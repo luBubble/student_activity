@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+//应用入口
 
 /**
  * Module dependencies.
