@@ -4,26 +4,26 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyParser=require('body-parser');
-
+var dbConfig =require('./data/dbConfig.json');
 //连接数据库
 var mysql = require('mysql'), 
     myConnection = require('express-myconnection'),
     dbOptions = {
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      port: 3306,
-      database: 'student_activity'
+      host: dbConfig.host,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      port: dbConfig.port,
+      database: dbConfig.database
     };
 //配置session
 var session = require('express-session'),
 	MysqlStore = require('express-mysql-session'),
 	sessionOptions = {
-    host:'localhost',
-    port:3306,
-    user:'root',
-    password:'',
-    database:'student_activity',
+    host: dbConfig.host,
+    user: dbConfig.user,
+    password: dbConfig.password,
+    port: dbConfig.port,
+    database: dbConfig.database,
     checkExpirationInterval:60000, //一分钟检查一次
     expiration: 3600000, //最大的生命期
     connectionLimit: 1,
@@ -32,7 +32,7 @@ var session = require('express-session'),
         columnNames: { //列
             session_id: 'session_id',
             expires: 'expires',
-            data: 'data'
+            data: 'data',
         }
     }
 };
@@ -57,7 +57,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json()); //解析 application/json
 app.use(bodyParser.urlencoded({extended:true})); //表单类提交的数据
 //在路由配置之前将数据库连接作为中间件来使用 
-app.use(myConnection(mysql, dbOptions, 'single')); 
+app.use(myConnection(mysql, dbOptions, 'single')); //简单的单例连接
 
 app.use(session({
     key: 'mgyusys', //自行设置密钥
