@@ -41,6 +41,7 @@ var sessionStore = new MysqlStore(sessionOptions);
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require('./routes/login');
+var addActivityRouter = require('./routes/addActivity');
 
 var app = express();
 
@@ -74,6 +75,7 @@ app.use(session({
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/login',loginRouter);
+app.use('/addActivity',addActivityRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

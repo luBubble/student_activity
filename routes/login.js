@@ -21,12 +21,11 @@ router.get('/', function(req, res, next) {
 		    if (resp.statusCode == 200) {
             let sessionKey = data.session_key
             let openid = data.openid
-            let unionid=data.unionid
             let timestamp=new Date().getTime()
-            
+            let userMsg={}
 //			//自定义的加密，作为session_id
 //          var skey = sha1(sessionKey)
-            let skey=sessionKey;
+            let skey=sessionKey
             
 //			//记录登录时间
             let loginMsg = {
@@ -37,7 +36,7 @@ router.get('/', function(req, res, next) {
             
             let sessionData = { 
                 session_id:skey,
-                expires:60000,         
+                expires:60000,   //过期时间      
                 data: JSON.stringify(loginMsg)
             }
             
@@ -50,26 +49,36 @@ router.get('/', function(req, res, next) {
         	if (err) {
             	return next(err);
         	} else {
-        		conn.query('select id from users where openid='+openid,[],function(err,result){
-        			if ( result === undefined || result.length === 0) {
-        				conn.query('insert into users(openid,unionid,session_id) values ("'+openid+'","'+unionid+'","'+skey+'")',function(err,result) {
+        		conn.query('select type,identify,number,name,phone from users where openid= ? ',openid,function(err,result){
+        			if ( result.length === 0) {
+        				conn.query('insert into users(openid,session_id) values ( ? , ? )',[openid,skey],function(err,result) {
                 			if (err) {
                     			return next(err);
                 			} else {
-                				console.log("--成功新增用户呵呵呵呵--");
+                				console.log("----新增用户----");
                 			}
             			});
         			} else {
-        				console.log("--用户已存在哈哈哈哈--");
+        				console.log("----用户已存在----");
+        				userMsg=result[0];
+        				conn.query('update users set session_id = ? where openid= ?',[skey,openid],function(err,result) {
+                			if (err) {
+                    			return next(err);
+                			} else {
+                				console.log("----更新用户session----");
+                			}
+            			})
         			}
         		})
             	
         		}
     	});
             //返回给客户端
-            res.json({session_data:sessionData,openid:openid})
+            res.json({	result:"授权成功",
+            			session_data:sessionData,
+            			openid:openid,userMsg:userMsg})
         } else {
-            res.json(err)
+            res.json({result:"error",err})
         }
         
 });
