@@ -36,12 +36,14 @@ var session = require('express-session'),
         }
     }
 };
-var sessionStore = new MysqlStore(sessionOptions);
+var sessionStore = new MysqlStore(sessionOptions);//实例化session存储管理器
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require('./routes/login');
 var addActivityRouter = require('./routes/addActivity');
+var getActivityRouter = require('./routes/getActivity');
 
 var app = express();
 
@@ -59,23 +61,23 @@ app.use(bodyParser.json()); //解析 application/json
 app.use(bodyParser.urlencoded({extended:true})); //表单类提交的数据
 //在路由配置之前将数据库连接作为中间件来使用 
 app.use(myConnection(mysql, dbOptions, 'single')); //简单的单例连接
-
-app.use(session({
+app.use(session({//作为中间件使用
     key: 'mgyusys', //自行设置密钥
     secret: 'sysuygm', //私钥
-    cookie: { 
-        maxAge: 60000  //最大生命期
-        },
+    cookie: { maxAge: 60000 },//最大生命期
     store: sessionStore,  //存储管理器
     resave: false,
     saveUninitialized: false
 }));
+
+
 
 //路由配置
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/login',loginRouter);
 app.use('/addActivity',addActivityRouter);
+app.use('/getActivity',getActivityRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

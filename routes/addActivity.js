@@ -1,8 +1,8 @@
 var express = require('express')
 var router = express.Router()
-var multer  = require('multer')
-var path=require('path');  /*nodejs自带的模块*/
 
+var multer  = require('multer')
+var path=require('path');  
 // 使用硬盘存储模式设置存放接收到的文件的路径以及文件名
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -11,11 +11,10 @@ var storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         // 将保存文件名设置为 'detailPic-' + 时间戳，比如 detailPic-151342376785.jpg
-		var extname=path.extname(file.originalname);	 //获取文件的后缀名
+		var extname=path.extname(file.originalname);//获取文件的后缀名
         cb(null, "activityPic-" + Date.now()+extname);  
     }
 })
-
 var upload = multer({ storage: storage})
 
 router.get('/', function(req, res, next) {
@@ -39,6 +38,19 @@ router.get('/', function(req, res, next) {
             							} else {
 											conn.query('select id from activity where title= ?',title,function(err,result){
 												activityId=result[0].id
+												console.log("----"+timeLineDatas)
+												let tlDatas=JSON.parse(timeLineDatas)
+												for(let i=0; i<tlDatas.length; i++){
+													console.log("----"+tlDatas.date+"----"+tlDatas.content)
+													conn.query('insert into activity_time_line(ac_id,date_time,content) values(?,?,?)',
+													[activityId,tlDatas[i].date,tlDatas[i].content],function(err,result){
+														if(err) {
+            												console.log("=====新建时间节点=====error"+err)
+            											} else {
+            												console.log("=====添加时间节点====")
+            											}
+													})
+												}
 												res.json({result:"success",ac_id:activityId})
 											})
             							}
@@ -107,7 +119,9 @@ router.post('/addSlidePic',upload.single('slidePic'),function(req, res, next){
         	if (err) {
             	return next(err);
         	} else {
-        			conn.query('update activity set slide_pic'+index+' = ? where id= ?',[ file.filename, ac_id],function(err){
+        			conn.query('update activity set slide_pic'+index+
+        			' = ? where id= ?',[ file.filename, ac_id],
+        			function(err){
         				if(err){
         					console.log("===更新轮播图图片error===="+err)
         				} else {

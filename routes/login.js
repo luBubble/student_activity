@@ -61,13 +61,13 @@ router.get('/', function(req, res, next) {
         			} else {
         				console.log("----用户已存在----");
         				userMsg=result[0];
-        				conn.query('update users set session_id = ? where openid= ?',[skey,openid],function(err,result) {
-                			if (err) {
-                    			return next(err);
-                			} else {
-                				console.log("----更新用户session----");
-                			}
-            			})
+//      				conn.query('update users set session_id = ? where openid= ?',[skey,openid],function(err,result) {
+//              			if (err) {
+//                  			return next(err);
+//              			} else {
+//              				console.log("----更新用户session----");
+//              			}
+//          			})
         			}
         		})
             	
